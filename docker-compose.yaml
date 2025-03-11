@@ -1,0 +1,51 @@
+
+networks:
+  application:
+    driver: bridge
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myBackendX
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - application
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: CampCameleonX
+      DB_USERNAME: postgres
+      DB_PASSWORD: secret
+    command: >
+      sh -c "
+        php artisan migrate &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  db:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: CampCameleonX
+    networks:
+      - application
+    container_name: myPostgresX
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
