@@ -9,5 +9,19 @@ use ApiPlatform\Metadata\ApiResource;
 
 class Customer extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'address',
+        'city',
+        'postal_code',
+        'country',
+        'notes'
+    ];
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }

@@ -19,7 +19,11 @@ return new class extends Migration
             $table->string('image', 255)->nullable();
             $table->unsignedBigInteger('category_id'); 
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->enum('type', ['Activity', 'Menu']);
+            $table->unsignedBigInteger('productable_id'); // ID di Activity/Menu
+            $table->string('productable_type'); // Classe del modello (Activity::class o Menu::class)
+            $table->string('tags')->nullable();
+            $table->json('options')->nullable();
+            $table->boolean('is_draft')->default(false);
 
             // // Clé étrangère explicite
             $table->foreign('category_id')
@@ -29,6 +33,7 @@ return new class extends Migration
     
             $table->timestamps();
         });
+
     }
 
     /**

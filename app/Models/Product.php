@@ -20,7 +20,11 @@ class Product extends Model
         'image',
         'category_id',
         'status',
-        'type',
+        'productable_id',
+        'productable_type',
+        'options',
+        'tags',
+        'is_draft'
     ];
 
     // Casts pour les enums
@@ -47,5 +51,55 @@ class Product extends Model
     public function scopeOfType($query, string $type)
     {
         return $query->where('type', $type);
+    }
+
+    public function productable()
+    {
+        return $this->morphTo(); // Relazione polimorfica
+    }
+
+    public function getOptionsAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+    public function setOptionsAttribute($value)
+    {
+        $this->attributes['options'] = json_encode($value);
+    }
+
+    public function getTagsAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+    public function setTagsAttribute($value)
+    {
+        $this->attributes['tags'] = json_encode($value);
+    }
+
+    public function getIsDraftAttribute($value)
+    {
+        return (bool) $value;
+    }
+
+    public function setIsDraftAttribute($value)
+    {
+        $this->attributes['is_draft'] = (int) $value;
+    }
+
+    public function getPhotoAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
+
+    public function getImageAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
+
+    public function tag()
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 }

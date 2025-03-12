@@ -9,5 +9,8 @@ use ApiPlatform\Metadata\ApiResource;
 
 class Room extends Model
 {
-    //
+    public function product()
+    {
+        return $this->morphOne(Product::class, 'productable');
+    }
 }
