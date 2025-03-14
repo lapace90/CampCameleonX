@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('phone')->nullable();
+            $table->string('phone');
             $table->string('address')->nullable();
             $table->string('city')->nullable();
             $table->string('state')->nullable();
-            $table->string('zip')->nullable();
+            $table->string('postal_code')->nullable();
             $table->string('country')->nullable();
-            $table->string('notes')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

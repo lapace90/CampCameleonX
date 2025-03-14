@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
+            $table->string('guide');
             $table->integer('duration');
+            $table->string('meeting_point');
+            $table->unsignedInteger('max_people');
+            $table->unsignedTinyInteger('difficulty_level')->default(1); // Pour calculateTags()
             $table->timestamps();
         });
     }

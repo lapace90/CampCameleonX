@@ -6,20 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('options', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->decimal('price', 8, 2)->default(0.00);
+            $table->unsignedBigInteger('product_id');
+            $table->string('product_type');
             $table->timestamps();
+
+            // Index pour améliorer les performances des requêtes polymorphiques
+            $table->index(['product_id', 'product_type']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('options');

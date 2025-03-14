@@ -20,21 +20,26 @@ return new class extends Migration
             $table->dateTime('checkin');
             $table->dateTime('checkout');
             $table->decimal('amount', 8, 2);
-            $table->string('invoice');
+            $table->string('invoice_number')->unique();
             $table->string('booking_source');
             $table->enum('payment_status', ['paid', 'pending', 'canceled'])->default('pending');
             $table->integer('number_of_children');
             $table->integer('number_of_adults');
-            $table->unsignedBigInteger('room_id');
             $table->text('comment')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->unsignedBigInteger('activity_id')->nullable();
-            $table->unsignedBigInteger('menu_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
-            // $table->unsignedBigInteger('product_id')->nullable();
+    
+            // Colonnes pour la relation polymorphique
+            $table->unsignedBigInteger('product_id');
+            $table->string('product_type');
+    
             $table->timestamps();
+    
+            // Définir les clés étrangères
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
+    
 
     /**
      * Reverse the migrations.

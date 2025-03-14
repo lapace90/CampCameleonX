@@ -3,17 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-// use App\Models\Room;
-// use App\Models\Customer;
+use App\Models\Customer;
 use App\Models\User;
-use App\Models\Product;
 use ApiPlatform\Metadata\ApiResource;
 
 #[ApiResource]
 class Reservation extends Model
 {
     protected $fillable = [
-        'id',
         'customer_name',
         'customer_email',
         'customer_phone',
@@ -21,19 +18,18 @@ class Reservation extends Model
         'checkin',
         'checkout',
         'amount',
-        'invoice',
+        'invoice_number',
         'booking_source',
         'payment_status',
         'number_of_children',
         'number_of_adults',
-        'room_id',
         'comment',
         'status',
-        'activity_id',
-        'menu_id',
         'user_id',
         'product_id',
+        'product_type',
     ];
+
 
     protected $casts = [
         'date' => 'datetime',
@@ -41,25 +37,10 @@ class Reservation extends Model
         'checkout' => 'datetime',
     ];
 
-    // public function room()
-    // {
-    //     return $this->belongsTo(Room::class);
-    // }
-
-    // public function activity()
-    // {
-    //     return $this->belongsTo(Activity::class);
-    // }
-
-    // public function menu()
-    // {
-    //     return $this->belongsTo(Menu::class);
-    // }
-
-    // public function customer()
-    // {
-    //     return $this->belongsTo(Customer::class);
-    // }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 
     public function user()
     {
@@ -68,6 +49,6 @@ class Reservation extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->morphTo();
     }
 }

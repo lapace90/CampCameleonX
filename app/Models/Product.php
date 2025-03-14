@@ -23,19 +23,18 @@ class Product extends Model
         'productable_id',
         'productable_type',
         'options',
-        'tags',
         'is_draft'
     ];
 
-    // Casts pour les enums
     protected $casts = [
-        'status' => 'string',
-        'type' => 'string'
+        'status' => 'boolean',
+        'options' => 'array',
+        'is_draft' => 'boolean'
     ];
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function reservations(): BelongsToMany
@@ -48,49 +47,14 @@ class Product extends Model
         return $query->where('status', 'active');
     }
 
-    public function scopeOfType($query, string $type)
+    public function scopeDraft($query)
     {
-        return $query->where('type', $type);
+        return $query->where('is_draft', true);
     }
 
     public function productable()
     {
-        return $this->morphTo(); // Relazione polimorfica
-    }
-
-    public function getOptionsAttribute($value)
-    {
-        return json_decode($value);
-    }
-
-    public function setOptionsAttribute($value)
-    {
-        $this->attributes['options'] = json_encode($value);
-    }
-
-    public function getTagsAttribute($value)
-    {
-        return json_decode($value);
-    }
-
-    public function setTagsAttribute($value)
-    {
-        $this->attributes['tags'] = json_encode($value);
-    }
-
-    public function getIsDraftAttribute($value)
-    {
-        return (bool) $value;
-    }
-
-    public function setIsDraftAttribute($value)
-    {
-        $this->attributes['is_draft'] = (int) $value;
-    }
-
-    public function getPhotoAttribute($value)
-    {
-        return $value ? asset('storage/' . $value) : null;
+        return $this->morphTo();
     }
 
     public function getImageAttribute($value)
@@ -98,8 +62,18 @@ class Product extends Model
         return $value ? asset('storage/' . $value) : null;
     }
 
-    public function tag()
+    // Tags globaux (ex: "promo")
+    public function globalTags()
     {
-        return $this->morphToMany(Tag::class, 'taggable');
+        return $this->belongsToMany(Tag::class, 'product_tag')
+            ->where('is_global', true)
+            ->withTimestamps();
+    }
+
+    public function getAllTagsAttribute()
+    {
+        return $this->globalTags
+            ->merge($this->productable->specificTags ?? collect())
+            ->unique('id');
     }
 }

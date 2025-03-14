@@ -26,5 +26,16 @@ class Category extends Model
         return $query->where('type', $type);
     }
 
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo ? asset('storage/' . $this->photo) : null;
+    }
 
+    public static function rules()
+    {
+        return [
+            'type' => (['Activity', 'Menu']),
+            'name' => 'required|max:50',
+        ];
+    }
 }

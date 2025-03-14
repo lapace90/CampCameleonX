@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
@@ -17,30 +14,39 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->decimal('price', 8, 2);
             $table->string('image', 255)->nullable();
-            $table->unsignedBigInteger('category_id'); 
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->unsignedBigInteger('productable_id'); // ID di Activity/Menu
-            $table->string('productable_type'); // Classe del modello (Activity::class o Menu::class)
-            $table->string('tags')->nullable();
+            $table->unsignedBigInteger('category_id');
+            $table->boolean('status')->default(true); // Changé en boolean
+            $table->unsignedBigInteger('productable_id');
+            $table->string('productable_type');
             $table->json('options')->nullable();
             $table->boolean('is_draft')->default(false);
+            $table->timestamps();
 
-            // // Clé étrangère explicite
+            // Clé étrangère pour la catégorie
             $table->foreign('category_id')
                   ->references('id')
                   ->on('categories')
                   ->onDelete('cascade');
-    
-            $table->timestamps();
+
+            // Index pour les relations polymorphiques
+            $table->index(['productable_id', 'productable_type']);
         });
 
+        // Créez la table pivot pour la relation plusieurs-à-plusieurs avec les tags
+        Schema::create('product_tag', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('tag_id');
+            $table->timestamps();
+
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::dropIfExists('product_tag');
         Schema::dropIfExists('products');
     }
 };
