@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Customer;
 use App\Models\User;
 use ApiPlatform\Metadata\ApiResource;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ApiResource]
 class Reservation extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'customer_name',
         'customer_email',

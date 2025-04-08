@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use ApiPlatform\Metadata\ApiResource;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ApiResource]
 class Invoice extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'invoice_number',
         'amount',

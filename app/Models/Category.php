@@ -4,11 +4,13 @@ namespace App\Models;
 
 use ApiPlatform\Metadata\ApiResource;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ApiResource]
 
 class Category extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'type',
         'name',

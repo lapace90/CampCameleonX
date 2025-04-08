@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Category;
 use App\Models\Reservation;
 use ApiPlatform\Metadata\ApiResource;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ApiResource]
 
 class Product extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'name',
         'description',

@@ -4,11 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use ApiPlatform\Metadata\ApiResource;
+use App\Models\Product;
+use App\Models\Tag;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ApiResource]
 
 class Activity extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'guide',
         'duration',

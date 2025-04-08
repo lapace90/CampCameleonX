@@ -10,7 +10,7 @@ class WelcomeController extends Controller
     public function index()
     {
         $users = User::all();
-        var_dump($users);
+        // var_dump($users);
         return view('welcome', compact('users'));
     }
     

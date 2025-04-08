@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use ApiPlatform\Metadata\ApiResource;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ApiResource]
 
 class Ingredient extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'name',
         'is_vegetarian',

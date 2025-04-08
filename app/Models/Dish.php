@@ -4,11 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use ApiPlatform\Metadata\ApiResource;
+use App\Models\Product;
+use App\Models\Ingredient;
+use App\Models\Tag;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 #[ApiResource]
 
 class Dish extends Model
 {
+    use HasFactory;
     // Charger toujours les ingrédients avec le plat pour les calculs
     protected $with = ['ingredients'];
 
