@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Product extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'description',
@@ -24,13 +25,11 @@ class Product extends Model
         'status',
         'productable_id',
         'productable_type',
-        'options',
         'is_draft'
     ];
 
     protected $casts = [
         'status' => 'boolean',
-        'options' => 'array',
         'is_draft' => 'boolean'
     ];
 
@@ -43,10 +42,10 @@ class Product extends Model
     {
         return $this->belongsToMany(Reservation::class)->withTimestamps();
     }
-    // Scopes
+
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('status', true);
     }
 
     public function scopeDraft($query)
@@ -59,12 +58,16 @@ class Product extends Model
         return $this->morphTo();
     }
 
+    public function options(): BelongsToMany
+    {
+        return $this->belongsToMany(Option::class, 'res_product_option')->withTimestamps();
+    }
+
     public function getImageAttribute($value)
     {
         return $value ? asset('storage/' . $value) : null;
     }
 
-    // Tags globaux (ex: "promo")
     public function globalTags()
     {
         return $this->belongsToMany(Tag::class, 'product_tag')
@@ -79,3 +82,5 @@ class Product extends Model
             ->unique('id');
     }
 }
+
+

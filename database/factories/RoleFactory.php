@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Role>
@@ -14,7 +15,7 @@ class RoleFactory extends Factory
      *
      * @var class-string<\Illuminate\Database\Eloquent\Model>
      */
-    protected $model = \App\Models\Role::class;
+    protected $model = Role::class;
     /**
      * Define the model's default state.
      *

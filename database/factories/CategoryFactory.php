@@ -27,7 +27,7 @@ class CategoryFactory extends Factory
     {
         return [
             'type' => $this->faker->randomElement(['Activity', 'Menu']),
-            'name' => $this->faker->word,
+            'name' => $this->faker->unique()->word,
             'photo' => $this->faker->imageUrl(),
             'description' => $this->faker->sentence,
         ];

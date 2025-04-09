@@ -5,21 +5,30 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use ApiPlatform\Metadata\ApiResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Product;
+use App\Models\Reservation;
 
 #[ApiResource]
 class Option extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'description',
         'price',
-        'product_id',
-        'product_type',
+        'productable_id',
+        'productable_type',
     ];
 
-    public function product()
+    public function products(): BelongsToMany
     {
-        return $this->morphTo();
+        return $this->belongsToMany(Product::class, 'res_product_option')->withTimestamps();
+    }
+
+    public function reservations(): BelongsToMany
+    {
+        return $this->belongsToMany(Reservation::class, 'res_product_option')->withTimestamps();
     }
 }

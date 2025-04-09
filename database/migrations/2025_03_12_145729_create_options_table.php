@@ -13,12 +13,13 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('price', 8, 2)->default(0.00);
-            $table->unsignedBigInteger('product_id');
-            $table->string('product_type');
+            // Colonnes pour la relation polymorphique
+            $table->unsignedBigInteger('productable_id');
+            $table->string('productable_type');
             $table->timestamps();
-
-            // Index pour améliorer les performances des requêtes polymorphiques
-            $table->index(['product_id', 'product_type']);
+    
+            // Index pour optimiser les requêtes polymorphiques
+            $table->index(['productable_id', 'productable_type']);
         });
     }
 

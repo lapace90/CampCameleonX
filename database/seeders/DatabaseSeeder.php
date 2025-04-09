@@ -1,79 +1,125 @@
-<?php 
+<?php
 
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\Option;
+use App\Models\Ingredient;
+use App\Models\User;
+use App\Models\Room;  // Assurez-vous que cette ligne est présente
+use App\Models\Category;
+use App\Models\Activity;
+use App\Models\Dish;
+use App\Models\Menu;
+use App\Models\Reservation;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\Tag;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        \App\Models\User::factory()->count(10)->create();
-        \App\Models\Category::factory()->count(10)->create();
+        DB::beginTransaction();
 
-        // Seed Options with valid product IDs
-        \App\Models\Product::factory()->count(5)->create()->each(function ($product) {
-            \App\Models\Option::factory()->count(3)->create([
-                'product_id' => $product->id,
-                'product_type' => \App\Models\Product::class,
-            ]);
-        });
+        try {
+            // Base models without dependencies
+            $this->seedModel('users', fn() => User::factory()->count(10)->create());
+            $this->seedModel('categories', fn() => Category::factory()->count(5)->create());
+            $this->seedModel('tags', fn() => Tag::factory()->count(10)->create());
+            $this->seedModel('ingredients', fn() => Ingredient::factory()->count(25)->create());
 
-        // Seed Products with valid category IDs
-        \App\Models\Product::factory()->count(10)->create([
-            'category_id' => \App\Models\Category::factory()->create()->id,
-        ]);
+            // Seed polymorphic models first
+            $this->seedModel('rooms', fn() => Room::factory()->count(10)->create());
+            $this->seedModel('dishes', fn() => Dish::factory()->count(15)->create());
+            $this->seedModel('activities', fn() => Activity::factory()->count(10)->create());
+            $this->seedModel('menus', fn() => Menu::factory()->count(10)->create());
 
-        // Seed Activities
-        \App\Models\Activity::factory()->count(10)->create();
+            // Seed products with polymorphic relations
+            $this->seedModel('products', function () {
+                $polymorphicModels = [
+                    Room::class,
+                    Dish::class,
+                    Activity::class,
+                    Menu::class,
+                ];
 
-        // Seed Customers
-        \App\Models\Customer::factory()->count(10)->create();
+                Product::factory()->count(45)->make()->each(function ($product) use ($polymorphicModels) {
+                    $productableType = $polymorphicModels[array_rand($polymorphicModels)];
+                    $productable = $productableType::inRandomOrder()->first();
 
-        // Seed Ingredients
-        \App\Models\Ingredient::factory()->count(25)->create();
+                    $product->productable_id = $productable->id;
+                    $product->productable_type = $productableType;
+                    $product->category_id = Category::inRandomOrder()->first()->id;
+                    $product->save();
+                });
+            });
+            
+            // Seed des options
+            Log::info("Seeding options...");
+            Option::factory()->count(15)->create();  // Appelle la factory des options
+            Log::info("Finished seeding options");
 
-        // Seed Rooms with valid options
-        \App\Models\Room::factory()->count(10)->create()->each(function ($room) {
-            $room->options()->attach(\App\Models\Option::factory()->count(3)->create([
-                'product_id' => $room->id,
-                'product_type' => \App\Models\Room::class,
-            ]));
-        });
+            $this->seedModel('customers', fn() => Customer::factory()->count(10)->create());
 
-        // Seed Invoices with valid relationships
-        \App\Models\Invoice::factory()->count(10)->create()->each(function ($invoice) {
-            $invoice->options()->attach(\App\Models\Option::factory()->count(3)->create([
-                'product_id' => $invoice->id,
-                'product_type' => \App\Models\Invoice::class,
-            ]));
-            $invoice->customer()->associate(\App\Models\Customer::factory()->create());
-            $invoice->reservation()->associate(\App\Models\Reservation::factory()->create());
-            $invoice->save();
-        });
+            // Models with complex dependencies
+            $this->seedModel('reservations', function () {
+                return Reservation::factory()->count(10)->create([
+                    'room_id' => function () {
+                        return Room::inRandomOrder()->first()->id;
+                    },
+                    'customer_id' => function () {
+                        return Customer::inRandomOrder()->first()->id;
+                    },
+                ]);
+            });
 
-        // Seed Reservations
-        \App\Models\Reservation::factory()->count(10)->create();
+            $this->seedModel('invoices', function () {
+                return Invoice::factory()->count(10)->create()->each(function ($invoice) {
+                    $invoice->customer()->associate(Customer::inRandomOrder()->first());
+                    $invoice->reservation()->associate(Reservation::inRandomOrder()->first());
+                    $invoice->save();
+                });
+            });
 
-        // Seed Tags
-        \App\Models\Tag::factory()->count(20)->create();
+            // Permissions and roles last
+            $this->seedModel('permissions', fn() => Permission::factory()->count(10)->create());
+            $this->seedModel('roles', function () {
+                return Role::factory()->count(5)->create()->each(function ($role) {
+                    $role->permissions()->attach(Permission::inRandomOrder()->take(3)->pluck('id'));
+                });
+            });
 
-        // Seed Dishes
-        \App\Models\Dish::factory()->count(15)->create();
-
-        // Seed Menus with valid dishes and options
-        \App\Models\Menu::factory()->count(10)->create()->each(function ($menu) {
-            $menu->options()->attach(\App\Models\Option::factory()->count(3)->create([
-                'product_id' => $menu->id,
-                'product_type' => \App\Models\Menu::class,
-            ]));
-            $menu->dishes()->attach(\App\Models\Dish::factory()->count(3)->create());
-        });
-
-        // Seed Permissions and Roles
-        \App\Models\Permission::factory()->count(10)->create();
-        \App\Models\Role::factory()->count(5)->create()->each(function ($role) {
-            $role->permissions()->attach(\App\Models\Permission::factory()->count(3)->create());
-        });
+            DB::commit();
+            Log::info('Database seeding completed successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Database seeding failed: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            throw $e;
+        }
+    }
+    /**
+     * Seed a model with a callback.
+     *
+     * @param string $name
+     * @param callable $callback
+     * @return void
+     */
+    private function seedModel(string $name, callable $callback): void
+    {
+        try {
+            Log::info("Seeding {$name}...");
+            $callback();
+            Log::info("Finished seeding {$name}");
+        } catch (\Exception $e) {
+            Log::error("Error seeding {$name}: " . $e->getMessage());
+            throw $e;
+        }
     }
 }

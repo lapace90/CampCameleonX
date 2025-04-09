@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Room;
+use App\Models\Option;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Room>
@@ -25,10 +27,9 @@ class RoomFactory extends Factory
         return [
             'capacity' => $this->faker->numberBetween(1, 10),
             'availability' => $this->faker->boolean(),
-            'productable_type' => \App\Models\Room::class,
-            'productable_id' => \App\Models\Room::factory(),
-            'productable' => \App\Models\Room::factory(),
-            'options' => \App\Models\Option::factory()->count(3),
+            'productable_type' => Room::class,
+            'productable_id' => Room::factory(),
+            'productable' => Room::factory(),
         ];
     }
 }
